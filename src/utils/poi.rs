@@ -5,7 +5,7 @@ pub struct Poi {
     pub name: String,
     pub location: Point<f32>,
     pub address: String,
-    pub description: Option<String>,
+    pub description: String,
 }
 
 impl Poi {
@@ -32,7 +32,7 @@ impl Poi {
 #[cfg(test)]
 mod tests {
     use geo::point;
-    use crate::Poi;
+    use crate::utils::poi::Poi;
 
     #[test]
     fn test_set_name() {
@@ -41,12 +41,12 @@ mod tests {
             location: point!(x: -74.006f32, y: 40.7128f32),
 
             address: "adad".to_string(),
-            description: Option::from("Описание".to_string()),
+            description: "Описание".to_string(),
         };
 
         a.set_name("Nelondon");
 
-        assert_eq!(a.name, "Neondon");
+        assert_eq!(a.name, "Nelondon");
     }
 }
 
