@@ -3,10 +3,11 @@ use telexide::api::types::{CopyMessage, EditMessageReplyMarkup, SendLocation, Se
 use telexide::model::{MessageContent, UpdateContent};
 use telexide::prelude::{CommandResult, Context, Message, Update};
 use telexide::prelude::prepare_listener;
-use crate::telegram::keyboard::build_reply_keyboard;
+use crate::telegram::keyboard::{build_inline_keyboard_markup, build_reply_keyboard_markup};
 use telexide::prelude::command;
 use crate::get_places_filtered_by_distance;
-
+use math::round;
+use telexide::model::ParseMode::Markdown;
 
 #[command(description = "Отправить своё местоположение")]
 async fn send_location(context: Context, message: Message) -> CommandResult {
@@ -21,7 +22,7 @@ async fn send_location(context: Context, message: Message) -> CommandResult {
             disable_notification: false,
             reply_to_message_id: None,
             allow_sending_without_reply: false,
-            reply_markup: Some(build_reply_keyboard()),
+            reply_markup: Some(build_reply_keyboard_markup()),
         })
         .await?;
     Ok(())
@@ -48,25 +49,27 @@ pub async fn hanlde_location(context: Context, update: Update) {
 
     let user_point = point!(x: location.latitude , y: location.longitude);
 
-    let distance: f64 = 5.0;
+    let radius: f64 = 5.0;
 
-    let places = get_places_filtered_by_distance(&user_point, distance);
-
-    //todo: Отправить несколько сообщений с inline keyboard
+    let places = get_places_filtered_by_distance(&user_point, radius);
 
     for place in places {
         let res = context
             .api
             .send_message(SendMessage {
                 chat_id: message.chat.get_id(),
-                text: place.name.to_string(),
-                parse_mode: None,
+                text: (
+                    format!("*{}*\n\n{}\n\n📍{}\n📏 в {} км от вас",
+                            place.0.name, place.0.description, place.0.address,
+                            round::ceil(place.1, 3))
+                ),
+                parse_mode: Option::from(Markdown),
                 enitites: None,
                 disable_web_page_preview: false,
                 disable_notification: false,
                 reply_to_message_id: None,
                 allow_sending_without_reply: false,
-                reply_markup: None,
+                reply_markup: Some(build_inline_keyboard_markup(format!("{}{}", place.0.lat, place.0.lng))),
             })
             .await;
         if res.is_err() {
@@ -78,6 +81,7 @@ pub async fn hanlde_location(context: Context, update: Update) {
         }
     }
 
+    //todo: callback func after inline button is pressed
 
     // let res = context
     //     .api

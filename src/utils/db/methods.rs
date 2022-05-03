@@ -29,20 +29,20 @@ pub fn get_places() -> Vec<Place> {
     results
 }
 
-pub fn get_places_filtered_by_distance(user_point: &Point<f64>, distance: f64) -> Vec<Place> {
+pub fn get_places_filtered_by_distance(user_point: &Point<f64>, radius: f64) -> Vec<(Place, f64)> {
     let connection = &mut establish_connection();
 
     let results = places
         .load::<Place>(connection)
         .expect("Error loading places");
 
-    let mut result: Vec<Place> = vec![];
+    let mut result: Vec<(Place, f64)> = vec![];
 
 
     for place in results {
-        if calculate_distance(user_point,
-                              &Point::new(place.lat, place.lng)) < distance {
-            let _ = &result.push(place);
+        let distance = calculate_distance(user_point, &Point::new(place.lat, place.lng));
+        if distance < radius {
+            let _ = &result.push((place, distance));
         }
     }
 

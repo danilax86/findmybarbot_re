@@ -9,7 +9,6 @@ use crate::ping_pong::*;
 use crate::location::*;
 use crate::telegram::commands::*;
 use crate::utils::db::methods::{create_place, get_places, get_places_filtered_by_distance};
-use crate::utils::poi::Poi;
 
 
 #[tokio::main]
