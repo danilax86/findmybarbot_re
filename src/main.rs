@@ -3,8 +3,9 @@ mod utils;
 
 use std::env;
 use telexide::{api::types::SendMessage, prelude::*};
-use crate::location::handle_next;
+use crate::location::hanlde_location;
 use crate::ping_pong::*;
+use crate::location::*;
 use crate::telegram::commands::*;
 
 
@@ -15,8 +16,8 @@ async fn main() -> telexide::Result<()> {
 
     ClientBuilder::new()
         .set_token(&token)
-        .set_framework(create_framework!(&bot_name, ping))
-        .add_handler_func(handle_next)
+        .set_framework(create_framework!(&bot_name, ping, send_location))
+        .add_handler_func(hanlde_location)
         .build()
         .start()
         .await
