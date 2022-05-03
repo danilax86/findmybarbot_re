@@ -9,10 +9,9 @@ pub fn calculate_distance(start: &Point<f32>, end: &Point<f32>) -> f32 {
 
 #[cfg(test)]
 mod tests {
-    use geo::{Point, point};
-    use crate::utils::poi::calculate_distance;
     use assert_approx_eq::assert_approx_eq;
-    use crate::utils::utils::calculate_distance;
+    use geo::point;
+    use crate::utils::calculate::calculate_distance;
 
     #[test]
     fn test_distance_calculator() {
