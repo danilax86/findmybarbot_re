@@ -6,7 +6,12 @@ use crate::utils::db::models::*;
 use crate::utils::db::schema::places::dsl::*;
 use diesel::{insert_into, RunQueryDsl};
 use diesel::QueryDsl;
+use geo::Point;
+use crate::point;
+use crate::utils::db::models;
 use crate::utils::poi::Poi;
+use crate::utils::poi::calculate_distance;
+
 
 pub fn establish_connection() -> PgConnection {
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
@@ -14,19 +19,34 @@ pub fn establish_connection() -> PgConnection {
         .unwrap_or_else(|_| panic!("Error connecting to {}", database_url))
 }
 
-pub fn get_places() {
+pub fn get_places() -> Vec<Place> {
     let connection = &mut establish_connection();
 
     let results = places
         .load::<Place>(connection)
         .expect("Error loading places");
 
-    println!("Displaying {} places", results.len());
+    results
+}
+
+pub fn get_places_filtered_by_distance(user_point: &Point<f64>, distance: f64) -> Vec<Place> {
+    let connection = &mut establish_connection();
+
+    let results = places
+        .load::<Place>(connection)
+        .expect("Error loading places");
+
+    let mut result: Vec<Place> = vec![];
+
+
     for place in results {
-        println!("{}", place.name);
-        println!("----------\n");
-        println!("{}", place.address);
+        if calculate_distance(user_point,
+                              &Point::new(place.lat, place.lng)) < distance {
+            let _ = &result.push(place);
+        }
     }
+
+    result
 }
 
 pub fn create_place(poi: &Poi) -> Place {

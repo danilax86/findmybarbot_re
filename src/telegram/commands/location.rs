@@ -1,9 +1,11 @@
+use geo::point;
 use telexide::api::types::{CopyMessage, EditMessageReplyMarkup, SendLocation, SendMessage};
 use telexide::model::{MessageContent, UpdateContent};
 use telexide::prelude::{CommandResult, Context, Message, Update};
 use telexide::prelude::prepare_listener;
 use crate::telegram::keyboard::build_reply_keyboard;
 use telexide::prelude::command;
+use crate::get_places_filtered_by_distance;
 
 
 #[command(description = "Отправить своё местоположение")]
@@ -44,30 +46,59 @@ pub async fn hanlde_location(context: Context, update: Update) {
         _ => return,
     };
 
+    let user_point = point!(x: location.latitude , y: location.longitude);
+
+    let distance: f64 = 5.0;
+
+    let places = get_places_filtered_by_distance(&user_point, distance);
 
     //todo: Отправить несколько сообщений с inline keyboard
 
-
-    let res = context
-        .api
-        .send_location(SendLocation {
-            chat_id: message.chat.get_id(),
-            latitude: location.latitude,
-            longitude: location.longitude,
-            live_period: None,
-            heading: None,
-            proximity_alert_radius: None,
-            disable_notification: false,
-            reply_to_message_id: None,
-            allow_sending_without_reply: false,
-            reply_markup: None,
-        })
-        .await;
-    if res.is_err() {
-        println!(
-            "got an error when sending the asking message: {}",
-            res.err().unwrap()
-        );
-        return;
+    for place in places {
+        let res = context
+            .api
+            .send_message(SendMessage {
+                chat_id: message.chat.get_id(),
+                text: place.name.to_string(),
+                parse_mode: None,
+                enitites: None,
+                disable_web_page_preview: false,
+                disable_notification: false,
+                reply_to_message_id: None,
+                allow_sending_without_reply: false,
+                reply_markup: None,
+            })
+            .await;
+        if res.is_err() {
+            println!(
+                "got an error when sending the asking message: {}",
+                res.err().unwrap()
+            );
+            return;
+        }
     }
+
+
+    // let res = context
+    //     .api
+    //     .send_location(SendLocation {
+    //         chat_id: message.chat.get_id(),
+    //         latitude: location.latitude,
+    //         longitude: location.longitude,
+    //         live_period: None,
+    //         heading: None,
+    //         proximity_alert_radius: None,
+    //         disable_notification: false,
+    //         reply_to_message_id: None,
+    //         allow_sending_without_reply: false,
+    //         reply_markup: None,
+    //     })
+    //     .await;
+    // if res.is_err() {
+    //     println!(
+    //         "got an error when sending the asking message: {}",
+    //         res.err().unwrap()
+    //     );
+    //     return;
+    // }
 }
