@@ -1,5 +1,5 @@
 [package]
-name = "findmybarbot_RE"
+name = "findmybarbot_re"
 version = "0.1.0"
 edition = "2021"
 
@@ -10,3 +10,4 @@ geo = "0.20.1"
 assert_approx_eq = "1.1.0"
 telexide = { git = "https://github.com/rmrfus/telexide", branch = "master" }
 tokio = { version = "1.18.1", features = ["full"] }
+diesel = { version = "2.0.0-rc.0", features = ["postgres"] }
