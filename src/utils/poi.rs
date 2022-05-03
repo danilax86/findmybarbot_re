@@ -1,16 +1,16 @@
-use geo::Point;
+use geo::{Point};
 use crate::utils::calculate::calculate_distance;
 
 pub struct Poi {
     pub name: String,
-    pub location: Point<f32>,
+    pub location: Point<f64>,
     pub address: String,
     pub description: String,
 }
 
 impl Poi {
-    fn calculate_distance_from_user(&self, user_location: &Point<f32>) -> f32 {
-        let poi_location = self.location;
+    fn calculate_distance_from_user(&self, user_location: &Point<f64>) -> f64 {
+        let poi_location = &self.location;
 
         calculate_distance(&poi_location, &user_location)
     }
@@ -31,14 +31,14 @@ impl Poi {
 
 #[cfg(test)]
 mod tests {
-    use geo::point;
+    use geo::{coord, point};
     use crate::utils::poi::Poi;
 
     #[test]
     fn test_set_name() {
         let mut a = Poi {
             name: "London".to_string(),
-            location: point!(x: -74.006f32, y: 40.7128f32),
+            location: point!(x: -74.006, y: 40.7128),
 
             address: "adad".to_string(),
             description: "Описание".to_string(),

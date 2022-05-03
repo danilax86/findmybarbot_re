@@ -1,11 +1,12 @@
-diesel::table! {
+use diesel::table;
+table! {
     places (id) {
-        id -> Int4,
-        name -> Text,
-        lat -> Float8,
-        lng -> Float8,
-        description -> Text,
-        address -> Text,
-        img_url -> Text,
+        id -> Integer,
+        name -> Varchar,
+        lat -> Double,
+        lng -> Double,
+        description -> Varchar,
+        address -> Varchar,
+        img_url -> Varchar,
     }
 }
