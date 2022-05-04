@@ -51,7 +51,9 @@ pub async fn hanlde_location(context: Context, update: Update) {
 
     let radius: f64 = 5.0;
 
-    let places = get_places_filtered_by_distance(&user_point, radius);
+    let mut places = get_places_filtered_by_distance(&user_point, radius);
+
+    places.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap());
 
     for place in places {
         let res = context
