@@ -1,13 +1,16 @@
+use std::collections::VecDeque;
+use diesel::sql_types::Integer;
 use geo::point;
 use telexide::api::types::{SendLocation, SendMessage};
 use telexide::model::{MessageContent, UpdateContent};
 use telexide::prelude::{CommandResult, Context, Message, Update};
 use telexide::prelude::prepare_listener;
-use crate::telegram::keyboard::{build_inline_keyboard_markup, build_reply_keyboard_markup};
+use crate::telegram::keyboard::{build_inline_keyboard_markup, build_inline_keyboard_where_is_it, build_keyboard_send_location, build_reply_keyboard_markup};
 use telexide::prelude::command;
 use crate::get_places_filtered_by_distance;
 use math::round;
 use telexide::model::ParseMode::Markdown;
+use crate::utils::db::models::Place;
 
 #[command(description = "Отправить своё местоположение")]
 async fn send_location(context: Context, message: Message) -> CommandResult {
@@ -22,7 +25,7 @@ async fn send_location(context: Context, message: Message) -> CommandResult {
             disable_notification: false,
             reply_to_message_id: None,
             allow_sending_without_reply: false,
-            reply_markup: Some(build_reply_keyboard_markup()),
+            reply_markup: Some(build_reply_keyboard_markup(build_keyboard_send_location())),
         })
         .await?;
     Ok(())
@@ -51,38 +54,16 @@ pub async fn hanlde_location(context: Context, update: Update) {
 
     let radius: f64 = 5.0;
 
-    let mut places = get_places_filtered_by_distance(&user_point, radius);
+    let mut places: Vec<(Place, f64)> = get_places_filtered_by_distance(&user_point, radius);
 
     places.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap());
 
-    for place in places {
-        let res = context
-            .api
-            .send_message(SendMessage {
-                chat_id: message.chat.get_id(),
-                text: (
-                    format!("*{}*\n\n{}\n\n📍{}\n📏 в {} км от вас",
-                            place.0.name, place.0.description, place.0.address,
-                            round::ceil(place.1, 3))
-                ),
-                parse_mode: Option::from(Markdown),
-                enitites: None,
-                disable_web_page_preview: false,
-                disable_notification: false,
-                reply_to_message_id: None,
-                allow_sending_without_reply: false,
-                reply_markup: Some(build_inline_keyboard_markup(format!("location {} {}", place.0.lat, place.0.lng))),
-            })
-            .await;
-        if res.is_err() {
-            println!(
-                "got an error when sending the asking message: {}",
-                res.err().unwrap()
-            );
-            return;
-        }
-    }
+    let mut places = VecDeque::from(places);
+
+
+    send_provided_amount_of_items(&mut places, 4, message.chat.get_id(), &context).await;
 }
+
 
 #[prepare_listener]
 pub async fn callback_handler(context: Context, update: Update) {
@@ -126,4 +107,47 @@ pub async fn callback_handler(context: Context, update: Update) {
         );
         return;
     }
+}
+
+async fn send_tuple(mut tuple: Option<&(Place, f64)>, chat_id: i64, context: &Context) {
+    let mut tuple = tuple.unwrap();
+    let res = context
+        .api
+        .send_message(SendMessage {
+            chat_id,
+            text: (
+                format!("*{}*\n\n{}\n\n📍{}\n📏 в {} км от вас",
+                        tuple.0.name, tuple.0.description, tuple.0.address,
+                        round::ceil(tuple.1, 3))
+            ),
+            parse_mode: Option::from(Markdown),
+            enitites: None,
+            disable_web_page_preview: false,
+            disable_notification: false,
+            reply_to_message_id: None,
+            allow_sending_without_reply: false,
+            reply_markup: Some(build_inline_keyboard_markup(
+                build_inline_keyboard_where_is_it(
+                    format!("location {} {}", tuple.0.lat, tuple.0.lng)))),
+        })
+        .await;
+    if res.is_err() {
+        println!(
+            "got an error when sending the asking message: {}",
+            res.err().unwrap()
+        );
+        return;
+    }
+}
+
+
+async fn send_provided_amount_of_items(source: &mut VecDeque<(Place, f64)>, amount: i32, chat_id: i64, context: &Context) {
+    for i in 0..amount {
+        if i == 4 {
+            // add inline button more
+            break;
+        }
+        send_tuple(source.front(), chat_id, context).await;
+        source.pop_front();
+    };
 }

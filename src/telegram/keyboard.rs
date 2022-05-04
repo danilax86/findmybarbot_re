@@ -1,7 +1,7 @@
 use telexide::model::{InlineKeyboardButton, InlineKeyboardMarkup, KeyboardButton, ReplyMarkup};
 use telexide::model::ReplyKeyboardMarkup;
 
-fn build_keyboard() -> Vec<Vec<KeyboardButton>> {
+pub fn build_keyboard_send_location() -> Vec<Vec<KeyboardButton>> {
     let send_loaction_btn = KeyboardButton {
         text: "📍 Отправить своё местоположение".parse().unwrap(),
         request_contact: false,
@@ -12,16 +12,7 @@ fn build_keyboard() -> Vec<Vec<KeyboardButton>> {
     vec![vec![send_loaction_btn]]
 }
 
-pub fn build_reply_keyboard_markup() -> ReplyMarkup {
-    ReplyMarkup::ReplyKeyboardMarkup(ReplyKeyboardMarkup {
-        keyboard: build_keyboard(),
-        resize_keyboard: true,
-        one_time_keyboard: false,
-        selective: false,
-    })
-}
-
-fn build_inline_keyboard(data: String) -> Vec<Vec<InlineKeyboardButton>> {
+pub fn build_inline_keyboard_where_is_it(data: String) -> Vec<Vec<InlineKeyboardButton>> {
     let place_location_btn = InlineKeyboardButton {
         text: "🗺 Где это?".to_string(),
         url: Option::from("".to_string()),
@@ -36,8 +27,17 @@ fn build_inline_keyboard(data: String) -> Vec<Vec<InlineKeyboardButton>> {
     vec![vec![place_location_btn]]
 }
 
-pub fn build_inline_keyboard_markup(data: String) -> ReplyMarkup {
+pub fn build_reply_keyboard_markup(keyboard: Vec<Vec<KeyboardButton>>) -> ReplyMarkup {
+    ReplyMarkup::ReplyKeyboardMarkup(ReplyKeyboardMarkup {
+        keyboard,
+        resize_keyboard: true,
+        one_time_keyboard: false,
+        selective: false,
+    })
+}
+
+pub fn build_inline_keyboard_markup(inline_keyboard: Vec<Vec<InlineKeyboardButton>>) -> ReplyMarkup {
     ReplyMarkup::InlineKeyboardMarkup(InlineKeyboardMarkup {
-        inline_keyboard: build_inline_keyboard(data)
+        inline_keyboard,
     })
 }
