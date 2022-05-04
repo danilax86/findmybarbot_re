@@ -1,4 +1,3 @@
-use std::collections::VecDeque;
 use diesel::prelude::*;
 use diesel::pg::PgConnection;
 use std::env;

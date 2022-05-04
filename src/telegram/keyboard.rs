@@ -27,6 +27,21 @@ pub fn build_inline_keyboard_where_is_it(data: String) -> Vec<Vec<InlineKeyboard
     vec![vec![place_location_btn]]
 }
 
+pub fn build_inline_keyboard_more(data: String) -> Vec<Vec<InlineKeyboardButton>> {
+    let place_location_btn = InlineKeyboardButton {
+        text: "✨ Показать ещё".to_string(),
+        url: Option::from("".to_string()),
+        login_url: None,
+        callback_data: Some(data),
+        switch_inline_query: None,
+        switch_inline_query_current_chat: None,
+        callback_game: None,
+        pay: false,
+    };
+
+    vec![vec![place_location_btn]]
+}
+
 pub fn build_reply_keyboard_markup(keyboard: Vec<Vec<KeyboardButton>>) -> ReplyMarkup {
     ReplyMarkup::ReplyKeyboardMarkup(ReplyKeyboardMarkup {
         keyboard,
