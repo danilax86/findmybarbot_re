@@ -2,8 +2,8 @@ mod telegram;
 mod utils;
 
 use std::env;
-use geo::{coord, point};
-use telexide::{api::types::SendMessage, prelude::*};
+use telexide::{prelude::*};
+use telexide::api::types::UpdateType;
 use crate::location::hanlde_location;
 use crate::location::callback_handler;
 use crate::ping_pong::*;
@@ -20,6 +20,7 @@ async fn main() -> telexide::Result<()> {
     ClientBuilder::new()
         .set_token(&token)
         .set_framework(create_framework!(&bot_name, ping, send_location))
+        .set_allowed_updates(vec![UpdateType::CallbackQuery, UpdateType::Message])
         .add_handler_func(hanlde_location)
         .add_handler_func(callback_handler)
         .build()

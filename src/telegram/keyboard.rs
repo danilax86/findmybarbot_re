@@ -1,7 +1,5 @@
-use std::fmt::format;
 use telexide::model::{InlineKeyboardButton, InlineKeyboardMarkup, KeyboardButton, ReplyMarkup};
 use telexide::model::ReplyKeyboardMarkup;
-use crate::telegram;
 
 fn build_keyboard() -> Vec<Vec<KeyboardButton>> {
     let send_loaction_btn = KeyboardButton {
@@ -25,7 +23,7 @@ pub fn build_reply_keyboard_markup() -> ReplyMarkup {
 
 fn build_inline_keyboard(data: String) -> Vec<Vec<InlineKeyboardButton>> {
     let place_location_btn = InlineKeyboardButton {
-        text: "Где это?".to_string(),
+        text: "🗺 Где это?".to_string(),
         url: Option::from("".to_string()),
         login_url: None,
         callback_data: Some(data),

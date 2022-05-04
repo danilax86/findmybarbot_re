@@ -1,16 +1,11 @@
-#[macro_use]
 use diesel::prelude::*;
 use diesel::pg::PgConnection;
 use std::env;
 use crate::utils::db::models::*;
 use crate::utils::db::schema::places::dsl::*;
 use diesel::{insert_into, RunQueryDsl};
-use diesel::QueryDsl;
 use geo::Point;
-use crate::point;
-use crate::utils::db::models;
-use crate::utils::poi::Poi;
-use crate::utils::poi::calculate_distance;
+use crate::utils::calculate::calculate_distance;
 
 
 pub fn establish_connection() -> PgConnection {
@@ -49,15 +44,16 @@ pub fn get_places_filtered_by_distance(user_point: &Point<f64>, radius: f64) -> 
     result
 }
 
-pub fn create_place(poi: &Poi) -> Place {
+// add img_url
+pub fn create_place(place: &Place) -> Place {
     let connection = &mut establish_connection();
 
     let new_place = NewPlace {
-        name: poi.name.as_str(),
-        lat: &poi.location.x(),
-        lng: &poi.location.y(),
-        description: poi.description.as_str(),
-        address: poi.address.as_str(),
+        name: place.name.as_str(),
+        lat: &place.lat,
+        lng: &place.lng,
+        description: place.description.as_str(),
+        address: place.address.as_str(),
     };
 
     insert_into(places)

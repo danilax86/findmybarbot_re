@@ -1,6 +1,6 @@
 use geo::point;
-use telexide::api::types::{AnswerCallbackQuery, CopyMessage, EditMessageReplyMarkup, SendLocation, SendMessage};
-use telexide::model::{CallbackQuery, MessageContent, UpdateContent};
+use telexide::api::types::{SendLocation, SendMessage};
+use telexide::model::{MessageContent, UpdateContent};
 use telexide::prelude::{CommandResult, Context, Message, Update};
 use telexide::prelude::prepare_listener;
 use crate::telegram::keyboard::{build_inline_keyboard_markup, build_reply_keyboard_markup};
@@ -69,7 +69,7 @@ pub async fn hanlde_location(context: Context, update: Update) {
                 disable_notification: false,
                 reply_to_message_id: None,
                 allow_sending_without_reply: false,
-                reply_markup: Some(build_inline_keyboard_markup(format!("callback {}{}", place.0.lat, place.0.lng))),
+                reply_markup: Some(build_inline_keyboard_markup(format!("location {} {}", place.0.lat, place.0.lng))),
             })
             .await;
         if res.is_err() {
@@ -82,8 +82,6 @@ pub async fn hanlde_location(context: Context, update: Update) {
     }
 }
 
-//todo: callback func after inline button is pressed
-
 #[prepare_listener]
 pub async fn callback_handler(context: Context, update: Update) {
     let callback = match update.content {
@@ -94,28 +92,36 @@ pub async fn callback_handler(context: Context, update: Update) {
     let data = callback.data.clone().unwrap_or_else(|| "".to_string());
     let chat_id = callback.message.clone().unwrap().chat.get_id();
 
-    //todo https://github.com/galeone/raf
-}
+    let mut lat: f64 = 0.0;
+    let mut lng: f64 = 0.0;
 
-// let res = context
-//     .api
-//     .send_location(SendLocation {
-//         chat_id: message.chat.get_id(),
-//         latitude: location.latitude,
-//         longitude: location.longitude,
-//         live_period: None,
-//         heading: None,
-//         proximity_alert_radius: None,
-//         disable_notification: false,
-//         reply_to_message_id: None,
-//         allow_sending_without_reply: false,
-//         reply_markup: None,
-//     })
-//     .await;
-// if res.is_err() {
-//     println!(
-//         "got an error when sending the asking message: {}",
-//         res.err().unwrap()
-//     );
-//     return;
-// }
+    if data.contains("location") {
+        let mut iter = data.split_ascii_whitespace();
+        iter.next();
+        lat = iter.next().unwrap().parse().unwrap();
+        lng = iter.next().unwrap().parse().unwrap();
+    }
+
+    let res = context
+        .api
+        .send_location(SendLocation {
+            chat_id,
+            latitude: lat,
+            longitude: lng,
+            live_period: None,
+            heading: None,
+            proximity_alert_radius: None,
+            disable_notification: false,
+            reply_to_message_id: None,
+            allow_sending_without_reply: false,
+            reply_markup: None,
+        })
+        .await;
+    if res.is_err() {
+        println!(
+            "got an error when sending the asking message: {}",
+            res.err().unwrap()
+        );
+        return;
+    }
+}
