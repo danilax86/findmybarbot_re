@@ -1,3 +1,4 @@
+use std::fmt::format;
 use telexide::model::{InlineKeyboardButton, InlineKeyboardMarkup, KeyboardButton, ReplyMarkup};
 use telexide::model::ReplyKeyboardMarkup;
 use crate::telegram;
@@ -27,7 +28,7 @@ fn build_inline_keyboard(data: String) -> Vec<Vec<InlineKeyboardButton>> {
         text: "Где это?".to_string(),
         url: Option::from("".to_string()),
         login_url: None,
-        callback_data: Option::from(data),
+        callback_data: Some(data),
         switch_inline_query: None,
         switch_inline_query_current_chat: None,
         callback_game: None,

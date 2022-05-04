@@ -5,6 +5,7 @@ use std::env;
 use geo::{coord, point};
 use telexide::{api::types::SendMessage, prelude::*};
 use crate::location::hanlde_location;
+use crate::location::callback_handler;
 use crate::ping_pong::*;
 use crate::location::*;
 use crate::telegram::commands::*;
@@ -20,6 +21,7 @@ async fn main() -> telexide::Result<()> {
         .set_token(&token)
         .set_framework(create_framework!(&bot_name, ping, send_location))
         .add_handler_func(hanlde_location)
+        .add_handler_func(callback_handler)
         .build()
         .start()
         .await
