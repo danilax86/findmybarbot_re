@@ -5,6 +5,7 @@ use crate::utils::db::models::*;
 use crate::utils::db::schema::places::dsl::*;
 use diesel::{insert_into, RunQueryDsl};
 use geo::Point;
+use crate::RADIUS;
 use crate::utils::calculate::calculate_distance;
 
 
@@ -24,7 +25,7 @@ pub fn get_places() -> Vec<Place> {
     results
 }
 
-pub fn get_places_filtered_by_distance(user_point: &Point<f64>, radius: f64) -> Vec<(Place, f64)> {
+pub fn get_places_filtered_by_distance(user_point: &Point<f64>) -> Vec<(Place, f64)> {
     let connection = &mut establish_connection();
 
     let results = places
@@ -36,7 +37,7 @@ pub fn get_places_filtered_by_distance(user_point: &Point<f64>, radius: f64) -> 
 
     for place in results {
         let distance = calculate_distance(user_point, &Point::new(place.lat, place.lng));
-        if distance < radius {
+        if distance < RADIUS {
             let _ = &result.push((place, distance));
         }
     }

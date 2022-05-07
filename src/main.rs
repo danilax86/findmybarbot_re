@@ -5,9 +5,9 @@ use std::env;
 use telexide::{prelude::*};
 use telexide::api::types::UpdateType;
 use crate::location::hanlde_location;
-use crate::location::callback_handler;
 use crate::ping_pong::*;
 use crate::location::*;
+use crate::telegram::callbacks::callback_handler::callback_handler;
 use crate::telegram::commands::*;
 use crate::utils::db::methods::{create_place, get_places, get_places_filtered_by_distance};
 
