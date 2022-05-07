@@ -1,7 +1,7 @@
 use std::collections::VecDeque;
 use geo::point;
 use telexide::client::Context;
-use crate::{get_places_filtered_by_distance, send_provided_amount_of_items};
+use crate::{get_places_filtered_by_distance, send_places_inside_radius};
 use crate::utils::db::models::Place;
 
 pub async fn handle_more_place_btn(data: &String, chat_id: i64, context: &Context) {
@@ -19,11 +19,12 @@ pub async fn handle_more_place_btn(data: &String, chat_id: i64, context: &Contex
         places.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap());
         let mut places: VecDeque<(Place, f64)> = VecDeque::from(places);
 
+        // Remove already shown places from vector
         while pop_places_amount != 0 {
             places.pop_front();
             pop_places_amount -= 1;
         }
 
-        send_provided_amount_of_items(&mut places, chat_id, user_point, &context).await;
+        send_places_inside_radius(&mut places, chat_id, user_point, &context).await;
     }
 }

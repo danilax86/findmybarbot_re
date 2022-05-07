@@ -56,7 +56,7 @@ pub async fn hanlde_location(context: Context, update: Update) {
     places.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap());
     let mut places: VecDeque<(Place, f64)> = VecDeque::from(places);
 
-    send_provided_amount_of_items(&mut places, message.chat.get_id(), user_point, &context).await;
+    send_places_inside_radius(&mut places, message.chat.get_id(), user_point, &context).await;
 }
 
 async fn send_place_info(tuple: Option<&(Place, f64)>, chat_id: i64, context: &Context) {
@@ -90,7 +90,7 @@ async fn send_place_info(tuple: Option<&(Place, f64)>, chat_id: i64, context: &C
     }
 }
 
-pub async fn send_provided_amount_of_items(source: &mut VecDeque<(Place, f64)>, chat_id: i64, user_point: Point<f64>, context: &Context) {
+pub async fn send_places_inside_radius(source: &mut VecDeque<(Place, f64)>, chat_id: i64, user_point: Point<f64>, context: &Context) {
     let source_amount_start = source.len();
 
     let mut counter: u32 = 0;
@@ -106,9 +106,10 @@ pub async fn send_provided_amount_of_items(source: &mut VecDeque<(Place, f64)>, 
         counter += 1;
     };
 
+    // Save an amount of already shown places in order to remove them later
     let pop_places_amount = source_amount_start - source.len();
 
-
+    // Add "show more" btn if you want to see next 4 places inside radius
     send_more_message(&pop_places_amount, chat_id, user_point, context).await;
 }
 
