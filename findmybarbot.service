@@ -1,0 +1,15 @@
+[Unit]
+Description=FindMyBarBotRustEdition
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Restart=on-failure
+User=danila
+Type=simple
+EnvironmentFile=/home/danila/findmybarbotre/.env
+WorkingDirectory=/home/danila/findmybarbotre/
+ExecStart=/home/danila/.cargo/bin/findmybarbotre
+
+[Install]
+WantedBy=multi-user.target

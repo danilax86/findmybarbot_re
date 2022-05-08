@@ -15,7 +15,7 @@ pub struct Place {
 }
 
 #[derive(Insertable)]
-#[table_name = "places"]
+#[diesel(table_name = places)]
 pub struct NewPlace<'a> {
     pub name: &'a str,
     pub lat: &'a f64,

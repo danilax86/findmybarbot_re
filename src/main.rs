@@ -5,11 +5,10 @@ use std::env;
 use telexide::{prelude::*};
 use telexide::api::types::UpdateType;
 use crate::location::hanlde_location;
-use crate::ping_pong::*;
 use crate::location::*;
 use crate::telegram::callbacks::callback_handler::callback_handler;
 use crate::telegram::commands::*;
-use crate::utils::db::methods::{create_place, get_places, get_places_filtered_by_distance};
+use crate::utils::db::methods::{get_places_filtered_by_distance};
 
 
 #[tokio::main]
@@ -19,7 +18,7 @@ async fn main() -> telexide::Result<()> {
 
     ClientBuilder::new()
         .set_token(&token)
-        .set_framework(create_framework!(&bot_name, ping, send_location))
+        .set_framework(create_framework!(&bot_name, send_location))
         .set_allowed_updates(vec![UpdateType::CallbackQuery, UpdateType::Message])
         .add_handler_func(hanlde_location)
         .add_handler_func(callback_handler)
