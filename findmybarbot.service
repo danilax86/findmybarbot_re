@@ -7,9 +7,9 @@ Wants=network-online.target
 Restart=on-failure
 User=danila
 Type=simple
-EnvironmentFile=/home/danila/findmybarbotre/.env
-WorkingDirectory=/home/danila/findmybarbotre/
-ExecStart=/home/danila/.cargo/bin/findmybarbotre
+EnvironmentFile=/home/danila/findmybarbot_re/.env
+WorkingDirectory=/home/danila/findmybarbot_re/
+ExecStart=/home/danila/.cargo/bin/findmybarbot_re
 
 [Install]
 WantedBy=multi-user.target
