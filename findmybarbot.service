@@ -6,10 +6,11 @@ Wants=network-online.target
 [Service]
 Restart=on-failure
 User=danila
+Group=danila
 Type=simple
-EnvironmentFile=/home/danila/findmybarbot_re/.env
-WorkingDirectory=/home/danila/findmybarbot_re/
-ExecStart=/home/danila/.cargo/bin/findmybarbot_re
+EnvironmentFile=/home/danila/projects/findmybarbot_re/.env
+WorkingDirectory=/home/danila/projects/findmybarbot_re
+ExecStart=/home/danila/projects/findmybarbot_re/target/release/findmybarbot_re
 
 [Install]
 WantedBy=multi-user.target
