@@ -53,6 +53,36 @@ pub async fn hanlde_location(context: Context, update: Update) {
 
     let user_point = point!(x: location.latitude , y: location.longitude);
     let mut places: Vec<(Place, f64)> = get_places_filtered_by_distance(&user_point);
+
+    if places.len() == 0 {
+        let res = context
+            .api
+            .send_message(SendMessage {
+                chat_id: message.chat.get_id(),
+                text: (
+                    format!("Рядом с вами не найдено ни одного бара :(")
+                ),
+                parse_mode: Option::from(Markdown),
+                enitites: None,
+                disable_web_page_preview: false,
+                disable_notification: false,
+                reply_to_message_id: None,
+                allow_sending_without_reply: false,
+                reply_markup: None,
+            })
+            .await;
+
+        if res.is_err() {
+            println!(
+                "got an error when sending the asking message: {}",
+                res.err().unwrap()
+            );
+            return;
+        }
+
+        return;
+    }
+
     places.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap());
     let mut places: VecDeque<(Place, f64)> = VecDeque::from(places);
 
