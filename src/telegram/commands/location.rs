@@ -92,9 +92,27 @@ pub async fn hanlde_location(context: Context, update: Update) {
 async fn send_place_info(tuple: Option<&(Place, f64)>, chat_id: i64, context: &Context) {
     let tuple = tuple.unwrap();
     let img = format!("{}", tuple.0.img_url);
-    let res;
+    let mut res;
 
-    if img.contains("no_image") {
+    res = context
+        .api
+        .send_photo(SendPhoto {
+            chat_id,
+            photo: (InputFile::from(img)),
+            caption: Option::from(prepare_info_message(&tuple)),
+            parse_mode: Option::from(Markdown),
+            disable_notification: false,
+            reply_to_message_id: None,
+            allow_sending_without_reply: false,
+            reply_markup: Some(build_inline_keyboard_markup(
+                build_inline_keyboard_where_is_it(
+                    format!("location {} {}", tuple.0.lat, tuple.0.lng)))),
+            caption_entities: None,
+        })
+        .await;
+
+    // Refactor this error handling, pls
+    if res.is_err() {
         res = context
             .api
             .send_message(SendMessage {
@@ -111,32 +129,13 @@ async fn send_place_info(tuple: Option<&(Place, f64)>, chat_id: i64, context: &C
                         format!("location {} {}", tuple.0.lat, tuple.0.lng)))),
             })
             .await;
-    } else {
-        res = context
-            .api
-            .send_photo(SendPhoto {
-                chat_id,
-                photo: (InputFile::from(img)),
-                caption: Option::from(prepare_info_message(&tuple)),
-                parse_mode: Option::from(Markdown),
-                disable_notification: false,
-                reply_to_message_id: None,
-                allow_sending_without_reply: false,
-                reply_markup: Some(build_inline_keyboard_markup(
-                    build_inline_keyboard_where_is_it(
-                        format!("location {} {}", tuple.0.lat, tuple.0.lng)))),
-                caption_entities: None,
-            })
-            .await;
-    }
-
-
-    if res.is_err() {
-        println!(
-            "got an error when sending the asking message: {}",
-            res.err().unwrap()
-        );
-        return;
+        if res.is_err() {
+            println!(
+                "got an error when sending the asking message: {}",
+                res.err().unwrap()
+            );
+            return;
+        }
     }
 }
 
