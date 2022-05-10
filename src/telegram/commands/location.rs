@@ -1,6 +1,6 @@
 use std::collections::VecDeque;
 use geo::{point, Point};
-use telexide::api::types::{SendMessage};
+use telexide::api::types::{InputFile, SendMessage, SendPhoto};
 use telexide::model::{MessageContent, UpdateContent};
 use telexide::prelude::{CommandResult, Context, Message, Update};
 use telexide::prelude::prepare_listener;
@@ -91,26 +91,46 @@ pub async fn hanlde_location(context: Context, update: Update) {
 
 async fn send_place_info(tuple: Option<&(Place, f64)>, chat_id: i64, context: &Context) {
     let tuple = tuple.unwrap();
-    let res = context
-        .api
-        .send_message(SendMessage {
-            chat_id,
-            text: (
-                format!("*{}*\n\n{}\n\n📍{}\n📏 в {} км от вас",
-                        tuple.0.name, tuple.0.description, tuple.0.address,
-                        round::ceil(tuple.1, 3))
-            ),
-            parse_mode: Option::from(Markdown),
-            enitites: None,
-            disable_web_page_preview: false,
-            disable_notification: false,
-            reply_to_message_id: None,
-            allow_sending_without_reply: false,
-            reply_markup: Some(build_inline_keyboard_markup(
-                build_inline_keyboard_where_is_it(
-                    format!("location {} {}", tuple.0.lat, tuple.0.lng)))),
-        })
-        .await;
+    let img = format!("{}", tuple.0.img_url);
+    let res;
+
+    if img.contains("no_image") {
+        res = context
+            .api
+            .send_message(SendMessage {
+                chat_id,
+                text: prepare_info_message(&tuple),
+                parse_mode: Option::from(Markdown),
+                enitites: None,
+                disable_web_page_preview: false,
+                disable_notification: false,
+                reply_to_message_id: None,
+                allow_sending_without_reply: false,
+                reply_markup: Some(build_inline_keyboard_markup(
+                    build_inline_keyboard_where_is_it(
+                        format!("location {} {}", tuple.0.lat, tuple.0.lng)))),
+            })
+            .await;
+    } else {
+        res = context
+            .api
+            .send_photo(SendPhoto {
+                chat_id,
+                photo: (InputFile::from(img)),
+                caption: Option::from(prepare_info_message(&tuple)),
+                parse_mode: Option::from(Markdown),
+                disable_notification: false,
+                reply_to_message_id: None,
+                allow_sending_without_reply: false,
+                reply_markup: Some(build_inline_keyboard_markup(
+                    build_inline_keyboard_where_is_it(
+                        format!("location {} {}", tuple.0.lat, tuple.0.lng)))),
+                caption_entities: None,
+            })
+            .await;
+    }
+
+
     if res.is_err() {
         println!(
             "got an error when sending the asking message: {}",
@@ -167,4 +187,10 @@ async fn send_more_message(pop_places_amount: &usize, chat_id: i64, user_point: 
         );
         return;
     }
+}
+
+fn prepare_info_message(tuple: &(Place, f64)) -> String {
+    format!("*{}*\n\n{}\n\n📍{}\n📏 в {} км от вас",
+            tuple.0.name, tuple.0.description, tuple.0.address,
+            round::ceil(tuple.1, 3))
 }
